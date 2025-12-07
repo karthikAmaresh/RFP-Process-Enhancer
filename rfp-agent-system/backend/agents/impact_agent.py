@@ -1,12 +1,9 @@
-# Impactful Statements Agent
+"""Impact Agent - Extracts impactful statements about budget, scale, and compliance"""
 from .base_agent import BaseAgent
 
 
 class ImpactfulStatementsAgent(BaseAgent):
-    """
-    Extract Impactful Statements: Budget, user count, compliance pressure
-    """
+    """Extract Impactful Statements: Budget, scale, deadlines, and compliance"""
     
     def extract(self, text: str) -> str:
-        """Extract impactful statements from RFP text"""
         return self.run(text)

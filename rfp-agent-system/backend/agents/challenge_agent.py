@@ -1,12 +1,9 @@
-# Challenges Agent
+"""Challenges Agent - Identifies technical and operational challenges"""
 from .base_agent import BaseAgent
 
 
 class ChallengesAgent(BaseAgent):
-    """
-    Extract Challenges: Performance, data issues, maintenance pain
-    """
+    """Extract Challenges: Performance, data, maintenance, and operational issues"""
     
     def extract(self, text: str) -> str:
-        """Extract challenges from RFP text"""
         return self.run(text)

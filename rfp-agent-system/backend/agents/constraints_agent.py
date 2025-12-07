@@ -1,6 +1,9 @@
+"""Constraints Agent - Identifies limitations and restrictions"""
 from agents.base_agent import BaseAgent
 
+
 class ConstraintsAgent(BaseAgent):
-    """Constraints and Limitations Agent"""
+    """Extract Constraints: Technical, budget, timeline, and regulatory limitations"""
+    
     def extract(self, text):
         return self.run(text)
