@@ -1,0 +1,15 @@
+# Core dependencies
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+python-multipart==0.0.20
+
+# Azure services
+azure-ai-documentintelligence==1.0.0
+azure-storage-blob==12.24.0
+
+# AI and ML
+ollama==0.4.7
+sentence-transformers==3.3.1
+
+# Utilities
+python-dotenv==1.0.1
