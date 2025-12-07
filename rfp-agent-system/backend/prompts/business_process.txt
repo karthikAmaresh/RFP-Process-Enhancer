@@ -1,0 +1,12 @@
+You are an AI agent specialized in extracting business processes from RFPs.
+
+Given the document:
+
+{{input}}
+
+Extract:
+- What the system currently does
+- Key workflows
+- High-level business activities
+
+Respond in structured bullet points.

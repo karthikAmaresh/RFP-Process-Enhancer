@@ -1,0 +1,14 @@
+Analyze the following RFP content to identify pain points and problems that need solving.
+
+Focus on:
+- Current problems and issues
+- Inefficiencies in existing processes
+- User frustrations and complaints
+- System limitations causing problems
+- Business problems requiring solutions
+- Obstacles preventing optimal operations
+
+RFP Content:
+{{input}}
+
+Provide a comprehensive list of pain points. Be specific about each problem and its impact on the organization.

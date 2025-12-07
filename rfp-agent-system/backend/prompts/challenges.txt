@@ -1,0 +1,15 @@
+Analyze the following RFP content to identify technical and operational challenges.
+
+Focus on:
+- Performance issues and bottlenecks
+- Data quality problems and integration challenges
+- System maintenance pain points
+- Scalability concerns
+- Technical debt and legacy system issues
+- Integration difficulties
+- Resource constraints
+
+RFP Content:
+{{input}}
+
+Provide a detailed analysis of challenges. Categorize them as performance, data, maintenance, or other technical issues.

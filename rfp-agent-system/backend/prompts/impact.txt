@@ -1,0 +1,15 @@
+Analyze the following RFP content to extract impactful statements about budget, scale, and compliance.
+
+Focus on:
+- Budget information and financial constraints
+- User count, transaction volumes, data scale
+- Compliance requirements and regulatory pressure
+- Business-critical metrics and KPIs
+- Deadlines and time pressures
+- Strategic importance statements
+- ROI expectations
+
+RFP Content:
+{{input}}
+
+Extract and highlight all impactful statements. Include specific numbers, deadlines, and compliance requirements mentioned.

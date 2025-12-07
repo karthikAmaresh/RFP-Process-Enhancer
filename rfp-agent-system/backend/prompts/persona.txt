@@ -1,0 +1,14 @@
+Analyze the following RFP content to extract user personas and their needs.
+
+Focus on:
+- Who uses the system (roles, departments, user types)
+- What each persona needs from the system
+- User workflows and activities
+- User pain points and requirements
+- Frequency and patterns of use
+- Different user roles and their permissions
+
+RFP Content:
+{{input}}
+
+Provide a detailed analysis of personas and user needs. Create profiles for each distinct user type mentioned.

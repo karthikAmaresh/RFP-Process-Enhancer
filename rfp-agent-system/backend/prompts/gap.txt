@@ -1,0 +1,14 @@
+Analyze the following RFP content to identify gaps between current and proposed solutions.
+
+Focus on:
+- Missing capabilities in current system
+- Proposed improvements or new features
+- Areas requiring enhancement
+- Functionality gaps
+- Features requested but not currently available
+- Differences between current state and desired future state
+
+RFP Content:
+{{input}}
+
+Provide a detailed gap analysis. List specific gaps and improvement areas mentioned in the RFP.

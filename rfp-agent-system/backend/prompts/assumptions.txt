@@ -1,0 +1,16 @@
+You are an AI agent specialized in extracting assumptions and dependencies from RFPs.
+
+Given the document:
+
+{{input}}
+
+Extract:
+- Stated assumptions about the current environment
+- Implied assumptions about capabilities or resources
+- Dependencies on external systems or services
+- Dependencies on third-party vendors
+- Dependencies on organizational changes
+- Technical dependencies
+- Timeline dependencies
+
+Respond in structured bullet points.
