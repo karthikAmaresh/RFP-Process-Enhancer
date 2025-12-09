@@ -7,6 +7,7 @@ load_dotenv()
 
 # Azure Blob Storage (for document storage)
 BLOB_CONN_STRING = os.getenv("BLOB_CONN_STRING")
+AZURE_STORAGE_CONNECTION_STRING = os.getenv("BLOB_CONN_STRING")  # Alias for consistency
 BLOB_CONTAINER_NAME = os.getenv("BLOB_CONTAINER_NAME", "rfpenhancer1")
 
 # Azure Document Intelligence (for PDF text extraction)
