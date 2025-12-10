@@ -6,7 +6,7 @@ from typing import Any, Callable
 class BaseAgent(ABC):
     """
     Abstract base class for all RFP analysis agents.
-    Works with local LLM (Ollama) via llm_client.
+    Uses Azure OpenAI for intelligent analysis.
     """
     
     def __init__(self, llm: Callable = None, prompt_template: str = None):
@@ -14,7 +14,7 @@ class BaseAgent(ABC):
         Initialize base agent.
         
         Args:
-            llm: Language model callable (e.g., local_llm from llm_client)
+            llm: Language model callable (Azure OpenAI generate method)
             prompt_template: Prompt template with {{input}} placeholder
         """
         self.llm = llm
@@ -51,7 +51,9 @@ class BaseAgent(ABC):
         
         try:
             prompt = self.prompt_template.replace("{{input}}", text)
+            # Call llm as a function (it's already the generate method)
             response = self.llm(prompt)
             return str(response)
         except Exception as e:
-            return f"Error during analysis: {str(e)}"
+            import traceback
+            return f"Error during analysis: {str(e)}\n{traceback.format_exc()}"

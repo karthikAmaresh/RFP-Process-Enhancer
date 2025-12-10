@@ -18,6 +18,4 @@ class IntroductionAgent(BaseAgent):
         Returns:
             str: Formatted introduction section
         """
-        prompt = self.prompt_template.replace("{{input}}", text)
-        response = self.llm.generate(prompt)
-        return response
+        return self.run(text)

@@ -1,5 +1,5 @@
 # Complete RFP Processing Pipeline
-# Uses: Azure Blob Storage, Azure Document Intelligence, Local LLM (Ollama)
+# Uses: Azure Blob Storage, Azure Document Intelligence, Azure OpenAI (GPT-4o)
 
 import os
 import sys

@@ -30,16 +30,17 @@ except Exception as e:
     print(f"✗ Configuration error: {e}")
     sys.exit(1)
 
-# Test 2: Check Ollama
-print("\n[2/6] Checking Ollama...")
+# Test 2: Check Azure OpenAI
+print("\n[2/6] Checking Azure OpenAI...")
 try:
-    from llm_client import local_llm
-    test_response = local_llm("Say 'OK' if you can read this.")
-    print(f"✓ Ollama is responding: {test_response[:50]}...")
+    from llm_client import LLMClient
+    client = LLMClient()
+    test_response = client.generate("Say 'OK' if you can read this.")
+    print(f"✓ Azure OpenAI is responding: {test_response[:50]}...")
 except Exception as e:
-    print(f"✗ Ollama error: {e}")
-    print("  → Make sure Ollama is installed and running")
-    print("  → Run: ollama serve")
+    print(f"✗ Azure OpenAI error: {e}")
+    print("  → Check AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_KEY in .env")
+    print("  → Verify deployment name is correct")
 
 # Test 3: Check embeddings
 print("\n[3/6] Checking embedding model...")
@@ -115,7 +116,7 @@ print("\n" + "=" * 60)
 print("VERIFICATION COMPLETE")
 print("=" * 60)
 print("\n✅ READY TO USE:")
-print("  • Ollama (local LLM) - Working")
+print("  • Azure OpenAI (GPT-4o) - Working")
 print("  • Embedding generation - Working")
 print("  • Local vector store - Working")
 print("  • All agents - Ready")

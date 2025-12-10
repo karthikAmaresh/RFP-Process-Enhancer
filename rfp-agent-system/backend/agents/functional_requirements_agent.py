@@ -18,6 +18,4 @@ class FunctionalRequirementsAgent(BaseAgent):
         Returns:
             str: Formatted functional requirements
         """
-        prompt = self.prompt_template.replace("{{input}}", text)
-        response = self.llm.generate(prompt)
-        return response
+        return self.run(text)

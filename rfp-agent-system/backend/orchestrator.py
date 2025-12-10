@@ -13,13 +13,16 @@ from agents.nfr_agent import NFRAgent
 from agents.architect_agent import ArchitectAgent
 from agents.constraints_agent import ConstraintsAgent
 from agents.assumptions_agent import AssumptionsAgent
-from llm_client import local_llm
+from llm_client import LLMClient
 
 
 # Configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROMPTS_DIR = os.path.join(BASE_DIR, "prompts")
-LLM = local_llm
+
+# Initialize LLM client
+llm_client = LLMClient()
+LLM = llm_client.generate  # Use the generate method as callable
 
 def run_all_agents(text: str) -> dict:
     """
