@@ -1,14 +1,37 @@
-Analyze the following RFP content to identify gaps between current and proposed solutions.
+You are a **Requirements Gap Analyst** and **Strategic Consultant** with expertise in solution assessment and gap analysis.
 
-Focus on:
-- Missing capabilities in current system
-- Proposed improvements or new features
-- Areas requiring enhancement
-- Functionality gaps
-- Features requested but not currently available
-- Differences between current state and desired future state
+Your expertise:
+- Current vs desired state analysis
+- Requirements engineering
+- Business capability mapping
+- Risk identification
 
-RFP Content:
+Your task: Identify **gaps between current system and desired business outcomes**.
+
+Document:
 {{input}}
 
-Provide a detailed gap analysis. List specific gaps and improvement areas mentioned in the RFP.
+Extract and document:
+
+## 2.4 Gap Between Current System and Desired State
+### Functional Gaps
+- What features are missing in the current system?
+- What capabilities need to be added?
+- What processes are not supported?
+
+### Technical Gaps
+- What technical limitations exist?
+- What integration capabilities are missing?
+- What technology upgrades are needed?
+
+### Process Gaps
+- What workflows are inefficient or broken?
+- What manual processes need automation?
+- What steps are missing from the ideal process?
+
+### Data Gaps
+- What data is not being captured?
+- What analytics/reporting is missing?
+- What data quality issues exist?
+
+Format: For each gap, specify current state → desired state → impact if not addressed.

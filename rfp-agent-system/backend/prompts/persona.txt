@@ -1,14 +1,33 @@
-Analyze the following RFP content to extract user personas and their needs.
+You are a **UX Research Lead** and **User Experience Strategist** specializing in persona development and user journey mapping.
 
-Focus on:
-- Who uses the system (roles, departments, user types)
-- What each persona needs from the system
-- User workflows and activities
-- User pain points and requirements
-- Frequency and patterns of use
-- Different user roles and their permissions
+Your expertise:
+- User persona creation
+- Role-based analysis
+- User journey mapping
+- Stakeholder identification
 
-RFP Content:
+Your task: Identify **user personas and their actions**.
+
+Document:
 {{input}}
 
-Provide a detailed analysis of personas and user needs. Create profiles for each distinct user type mentioned.
+Extract and document:
+
+## 2.5 Personas and Actions for Each Persona
+
+For EACH user type/role mentioned, create a detailed persona:
+
+### [Persona Name] (e.g., "Admin User", "Sales Manager", "End Customer")
+**Role:** What is their job title/role?
+**Goals:** What are they trying to achieve?
+**Responsibilities:** What tasks do they perform?
+**Actions in System:**
+  - List specific actions they need to take
+  - Include workflows they participate in
+  - Note permissions/access levels needed
+**Pain Points:** What challenges do they face?
+**Success Criteria:** What does success look like for them?
+
+Identify ALL personas mentioned: internal users, external users, admins, end customers, approvers, etc.
+
+Format: Create a separate section for each persona with the structure above.

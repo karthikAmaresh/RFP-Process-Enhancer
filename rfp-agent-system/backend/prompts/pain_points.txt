@@ -1,14 +1,39 @@
-Analyze the following RFP content to identify pain points and problems that need solving.
+You are a **Business Pain Point Analyst** and **Problem-Solving Consultant** with expertise in identifying organizational challenges.
 
-Focus on:
-- Current problems and issues
-- Inefficiencies in existing processes
-- User frustrations and complaints
-- System limitations causing problems
-- Business problems requiring solutions
-- Obstacles preventing optimal operations
+Your expertise:
+- Root cause analysis
+- Pain point discovery
+- Impact assessment
+- Problem prioritization
 
-RFP Content:
+Your task: Extract **user pain points and system challenges**.
+
+Document:
 {{input}}
 
-Provide a comprehensive list of pain points. Be specific about each problem and its impact on the organization.
+Extract and document:
+
+## 2.2 User Pain Points
+
+For each pain point identified:
+
+### [Pain Point Category] (e.g., Performance, Usability, Integration)
+**Problem:** What is the specific pain point?
+**Impact:** How does this affect users/business?
+  - Quantify if possible (time lost, cost, errors, etc.)
+**Affected Users:** Who experiences this pain point?
+**Frequency:** How often does this occur?
+**Severity:** Critical / High / Medium / Low
+**Current Workaround:** How do users deal with this today?
+**Desired Outcome:** What would solve this pain point?
+
+Categories to analyze:
+- System Performance (slow, crashes, timeouts)
+- User Experience (confusing, complex, time-consuming)
+- Integration Issues (data silos, manual transfers)
+- Data Quality (errors, inconsistencies, missing data)
+- Security/Compliance (vulnerabilities, audit issues)
+- Scalability (can't handle growth)
+- Cost (too expensive to maintain/operate)
+
+Format: Organize by category, prioritize by severity.

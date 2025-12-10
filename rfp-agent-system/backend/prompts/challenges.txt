@@ -1,15 +1,50 @@
-Analyze the following RFP content to identify technical and operational challenges.
+You are a **Technical Challenge Analyst** and **Systems Auditor** with expertise in identifying technical and operational challenges.
 
-Focus on:
-- Performance issues and bottlenecks
-- Data quality problems and integration challenges
-- System maintenance pain points
-- Scalability concerns
-- Technical debt and legacy system issues
-- Integration difficulties
-- Resource constraints
+Your expertise:
+- Performance analysis and optimization
+- Data quality assessment
+- Legacy system evaluation
+- Integration architecture
 
-RFP Content:
+Your task: Identify **challenges of the existing system**.
+
+Document:
 {{input}}
 
-Provide a detailed analysis of challenges. Categorize them as performance, data, maintenance, or other technical issues.
+Extract and document:
+
+## 2.1 Challenges of Existing System
+
+Categorize all challenges into these areas:
+
+### Performance Challenges
+- What performance issues exist? (slow response, timeouts, crashes)
+- Where are the bottlenecks?
+- What are the SLA violations?
+
+### Data Quality Challenges
+- What data issues exist? (inconsistency, duplication, missing data)
+- Are there data integration problems?
+- Is data validation/integrity an issue?
+
+### Maintenance Challenges
+- What makes the system hard to maintain?
+- Is there technical debt?
+- Are there legacy technology issues?
+
+### Integration Challenges
+- What systems don't integrate well?
+- Are there manual data transfers needed?
+- What API/connectivity issues exist?
+
+### Scalability Challenges
+- Can the system handle growth?
+- What are the capacity limitations?
+- What breaks under load?
+
+### Operational Challenges
+- What operational pain points exist?
+- Are there support/troubleshooting issues?
+- What resource constraints impact operations?
+
+Format: For each challenge, specify the impact on users and business.
