@@ -3,12 +3,16 @@
 
 import os
 import sys
+from dotenv import load_dotenv
 from document_processing.extract_text import extract_text_from_blob, extract_text_from_pdf
 from document_processing.chunking import chunk_text
 from embedding.embedder import generate_embedding
-from orchestrator import run_all_agents, save_to_kb
+from orchestrator_http import run_all_agents, save_to_kb
 
-def process_rfp_document(blob_name: str = None, file_path: str = None):
+# Load Container App URLs
+load_dotenv('.env.agents')
+
+async def process_rfp_document(blob_name: str = None, file_path: str = None):
     """
     Complete pipeline to process RFP document
     
@@ -106,7 +110,7 @@ def process_rfp_document(blob_name: str = None, file_path: str = None):
     print("\n[4/5] Running AI agents for analysis...")
     # Use first chunk for demo, or combine chunks for full analysis
     analysis_text = chunks[0] if len(chunks) > 0 else text[:5000]
-    results = run_all_agents(analysis_text)
+    results = await run_all_agents(analysis_text)
     print(f"✓ Completed analysis with {len(results)} agents")
     
     # Step 5: Results ready (don't auto-save to file)

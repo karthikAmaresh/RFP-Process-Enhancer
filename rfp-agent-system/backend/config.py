@@ -2,7 +2,8 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from .env and .env.agents
+load_dotenv('.env.agents')  # Load Container App URLs first
 load_dotenv()
 
 # Azure Blob Storage (for document storage)

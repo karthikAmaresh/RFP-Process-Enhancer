@@ -93,7 +93,7 @@ async def process_document(file: UploadFile = File(...), use_blob_storage: bool 
                     print(f"✓ Uploaded to blob: {blob_name}")
                     
                     # Process from blob
-                    process_rfp_document(blob_name=blob_name)
+                    await process_rfp_document(blob_name=blob_name)
                     
                 except Exception as blob_error:
                     print(f"⚠ Blob storage error: {blob_error}")
@@ -113,7 +113,7 @@ async def process_document(file: UploadFile = File(...), use_blob_storage: bool 
             print(f"Processing document: {file.filename}")
             import traceback
             try:
-                process_rfp_document(file_path=tmp_path)
+                await process_rfp_document(file_path=tmp_path)
             except Exception as pipeline_error:
                 print(f"Pipeline error: {str(pipeline_error)}")
                 print(traceback.format_exc())

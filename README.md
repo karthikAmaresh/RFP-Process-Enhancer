@@ -18,6 +18,10 @@ The RFP Process Enhancer automates the analysis of Request for Proposal (RFP) do
 
 ## 🏗️ Architecture
 
+### Deployment Options
+1. **Local**: Ollama (llama3) - Free, runs on your machine
+2. **Azure**: 12 Container Apps + Azure OpenAI GPT-4o - Cloud, scalable
+
 ### Agent Ecosystem
 
 | Agent | Persona | Output Section |
@@ -152,7 +156,8 @@ KB output now follows industry-standard template with:
 
 ## 🔧 Configuration
 
-Edit `backend/config.py`:
+### Local Development (Ollama)
+Edit `rfp-agent-system/backend/config.py`:
 
 ```python
 # Azure Document Intelligence
@@ -167,6 +172,13 @@ CONTAINER_NAME = "rfp-documents"
 OLLAMA_HOST = "http://localhost:11434"
 MODEL = "llama3"
 ```
+
+### Azure Deployment (Container Apps)
+For production deployment to Azure Container Apps, see [DEPLOYMENT.md](DEPLOYMENT.md):
+- 12 agents deployed as microservices
+- Azure OpenAI GPT-4o
+- Auto-scaling and cost optimization
+- Script: `rfp-agent-system/backend/rebuild-all-agents.bat`
 
 ## 📊 Performance
 

@@ -11,8 +11,10 @@
 ### Start Backend (Terminal 1)
 
 ```powershell
-cd backend
-python -m uvicorn api:app --reload --host 0.0.0.0 --port 8000
+# From RFP-Process-Enhancer folder:
+cd rfp-agent-system\backend
+.\.venv\Scripts\Activate.ps1
+python -m uvicorn api:app --reload --port 8000
 ```
 
 ✅ Backend running at: **http://localhost:8000**  
@@ -21,7 +23,8 @@ python -m uvicorn api:app --reload --host 0.0.0.0 --port 8000
 ### Start Frontend (Terminal 2)
 
 ```powershell
-cd ui
+# From RFP-Process-Enhancer folder:
+cd rfp-agent-system\ui
 npm run dev
 ```
 
