@@ -4,6 +4,8 @@ import os
 from typing import Optional
 import time
 import logging
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from openai import RateLimitError, APIError, APITimeoutError
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -64,6 +66,12 @@ class AzureOpenAIClient:
         
         logger.info(f"Initialized Azure OpenAI client with deployment: {deployment_name}")
     
+    @retry(
+        stop=stop_after_attempt(5),
+        wait=wait_exponential(multiplier=1, min=2, max=60),
+        retry=retry_if_exception_type((RateLimitError, APIError, APITimeoutError)),
+        reraise=True
+    )
     def generate(self, prompt: str, system_message: Optional[str] = None) -> str:
         """
         Generate a response from Azure OpenAI.

@@ -1,5 +1,5 @@
 # Text extraction from RFP documents
-from azure.ai.formrecognizer import DocumentAnalysisClient
+from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.core.credentials import AzureKeyCredential
 from azure.storage.blob import BlobServiceClient
 import sys
@@ -24,13 +24,13 @@ def extract_text_from_pdf_bytes(file_bytes: bytes) -> str:
     if not config.FORM_RECOGNIZER_ENDPOINT or not config.FORM_RECOGNIZER_KEY:
         raise ValueError("Azure Form Recognizer credentials not configured")
         
-    client = DocumentAnalysisClient(
+    client = DocumentIntelligenceClient(
         endpoint=config.FORM_RECOGNIZER_ENDPOINT,
         credential=AzureKeyCredential(config.FORM_RECOGNIZER_KEY)
     )
     
     # Analyze from bytes instead of URL (works with private blob storage)
-    poller = client.begin_analyze_document("prebuilt-read", file_bytes)
+    poller = client.begin_analyze_document("prebuilt-read", body=file_bytes, content_type="application/pdf")
     result = poller.result()
     
     # Extract all text content

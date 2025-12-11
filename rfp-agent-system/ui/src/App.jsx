@@ -69,8 +69,9 @@ function App() {
         }
       }, 3000)
 
-      // Call backend API
-      const response = await fetch('http://localhost:8000/api/process', {
+      // Call backend API (Azure Functions or local)
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/api/process`, {
         method: 'POST',
         body: formData
       })

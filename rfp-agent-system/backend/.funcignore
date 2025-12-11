@@ -1,0 +1,12 @@
+.git*
+.vscode
+__pycache__
+*.pyc
+.env
+.venv
+venv/
+data/
+*.pdf
+*.log
+.python_packages/
+node_modules/

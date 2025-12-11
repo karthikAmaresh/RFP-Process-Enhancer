@@ -109,10 +109,9 @@ def process_rfp_document(blob_name: str = None, file_path: str = None):
     results = run_all_agents(analysis_text)
     print(f"✓ Completed analysis with {len(results)} agents")
     
-    # Step 5: Save results to knowledge base
-    print("\n[5/5] Saving results to knowledge base...")
-    save_to_kb(results)
-    print("✓ Results saved to kb.md")
+    # Step 5: Results ready (don't auto-save to file)
+    print("\n[5/5] Analysis complete - results ready")
+    print("✓ Results available via API (kb.md not auto-generated)")
     
     print("\n" + "=" * 60)
     print("PROCESSING COMPLETE")
