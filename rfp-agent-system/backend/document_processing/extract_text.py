@@ -23,7 +23,6 @@ def extract_text_from_pdf_bytes(file_bytes: bytes) -> str:
     """
     if not config.FORM_RECOGNIZER_ENDPOINT or not config.FORM_RECOGNIZER_KEY:
         raise ValueError("Azure Form Recognizer credentials not configured")
-        
     client = DocumentIntelligenceClient(
         endpoint=config.FORM_RECOGNIZER_ENDPOINT,
         credential=AzureKeyCredential(config.FORM_RECOGNIZER_KEY)
@@ -56,7 +55,6 @@ def extract_text_from_pdf(file_url: str) -> str:
     """
     if not config.FORM_RECOGNIZER_ENDPOINT or not config.FORM_RECOGNIZER_KEY:
         raise ValueError("Azure Form Recognizer credentials not configured")
-        
     client = DocumentAnalysisClient(
         endpoint=config.FORM_RECOGNIZER_ENDPOINT,
         credential=AzureKeyCredential(config.FORM_RECOGNIZER_KEY)
