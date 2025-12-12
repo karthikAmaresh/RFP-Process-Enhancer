@@ -45,7 +45,7 @@ def extract_text_from_pdf_bytes(file_bytes: bytes) -> str:
 
 def extract_text_from_pdf(file_url: str) -> str:
     """
-    Extract text from PDF document using Azure Form Recognizer (URL method)
+    Extract text from PDF document using Azure Document Intelligence (URL method)
     Note: This doesn't work with private blob storage
     
     Args:
@@ -57,12 +57,12 @@ def extract_text_from_pdf(file_url: str) -> str:
     if not config.FORM_RECOGNIZER_ENDPOINT or not config.FORM_RECOGNIZER_KEY:
         raise ValueError("Azure Form Recognizer credentials not configured")
         
-    client = DocumentAnalysisClient(
+    client = DocumentIntelligenceClient(
         endpoint=config.FORM_RECOGNIZER_ENDPOINT,
         credential=AzureKeyCredential(config.FORM_RECOGNIZER_KEY)
     )
     
-    poller = client.begin_analyze_document_from_url("prebuilt-read", file_url)
+    poller = client.begin_analyze_document("prebuilt-read", analyze_request=file_url)
     result = poller.result()
     
     # Extract all text content
@@ -115,12 +115,12 @@ def extract_text_with_structure(file_url: str) -> dict:
     if not config.FORM_RECOGNIZER_ENDPOINT or not config.FORM_RECOGNIZER_KEY:
         raise ValueError("Azure Form Recognizer credentials not configured")
         
-    client = DocumentAnalysisClient(
+    client = DocumentIntelligenceClient(
         endpoint=config.FORM_RECOGNIZER_ENDPOINT,
         credential=AzureKeyCredential(config.FORM_RECOGNIZER_KEY)
     )
     
-    poller = client.begin_analyze_document_from_url("prebuilt-layout", file_url)
+    poller = client.begin_analyze_document("prebuilt-layout", analyze_request=file_url)
     result = poller.result()
     
     extracted_data = {

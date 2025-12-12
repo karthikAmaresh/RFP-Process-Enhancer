@@ -8,9 +8,13 @@ from document_processing.extract_text import extract_text_from_blob, extract_tex
 from document_processing.chunking import chunk_text
 from embedding.embedder import generate_embedding
 from azure_openai_orchestrator import AzureOpenAIOrchestrator
+from azure_foundry_orchestrator import AzureFoundryOrchestrator
 
 # Load environment variables
 load_dotenv()
+
+# Choose orchestrator: 'foundry' for Azure AI Foundry, 'openai' for direct Azure OpenAI
+USE_FOUNDRY = os.getenv("USE_FOUNDRY", "true").lower() == "true"
 
 async def process_rfp_document(blob_name: str = None, file_path: str = None):
     """
@@ -106,12 +110,29 @@ async def process_rfp_document(blob_name: str = None, file_path: str = None):
     print(f"✓ Generated {len(embeddings)} embeddings (768-dim)")
     print(f"✓ Stored in local vector store: {stats['total_chunks']} chunks")
     
-    # Step 4: Run all agents using Azure OpenAI directly
+    # Step 4: Run all agents
     print("\n[4/5] Running AI agents for analysis...")
-    orchestrator = AzureOpenAIOrchestrator()
-    # Use full text for comprehensive analysis (or first 8000 chars if too long)
-    analysis_text = text[:8000] if len(text) > 8000 else text
-    results = orchestrator.run_all_agents(analysis_text)
+    
+    if USE_FOUNDRY:
+        print("Using Azure AI Foundry Agents API with file search...")
+        orchestrator = AzureFoundryOrchestrator()
+        # Foundry needs a file path, so save text to temp file if from blob
+        if blob_name and not file_path:
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as tmp:
+                tmp.write(text)
+                temp_file_path = tmp.name
+            results = orchestrator.run_all_agents(temp_file_path)
+            os.remove(temp_file_path)  # Clean up
+        else:
+            results = orchestrator.run_all_agents(file_path)
+        orchestrator.cleanup()  # Clean up agents and vector store
+    else:
+        print("Using Azure OpenAI direct API...")
+        orchestrator = AzureOpenAIOrchestrator()
+        analysis_text = text[:8000] if len(text) > 8000 else text
+        results = orchestrator.run_all_agents(analysis_text)
+    
     print(f"✓ Completed analysis with {len(results)} agents")
     
     # Step 5: Results ready (don't auto-save to file)
