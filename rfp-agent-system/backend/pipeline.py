@@ -7,10 +7,10 @@ from dotenv import load_dotenv
 from document_processing.extract_text import extract_text_from_blob, extract_text_from_pdf
 from document_processing.chunking import chunk_text
 from embedding.embedder import generate_embedding
-from orchestrator_http import run_all_agents, save_to_kb
+from azure_openai_orchestrator import AzureOpenAIOrchestrator
 
-# Load Container App URLs
-load_dotenv('.env.agents')
+# Load environment variables
+load_dotenv()
 
 async def process_rfp_document(blob_name: str = None, file_path: str = None):
     """
@@ -106,11 +106,12 @@ async def process_rfp_document(blob_name: str = None, file_path: str = None):
     print(f"✓ Generated {len(embeddings)} embeddings (768-dim)")
     print(f"✓ Stored in local vector store: {stats['total_chunks']} chunks")
     
-    # Step 4: Run all agents on first chunk (or combined text)
+    # Step 4: Run all agents using Azure OpenAI directly
     print("\n[4/5] Running AI agents for analysis...")
-    # Use first chunk for demo, or combine chunks for full analysis
-    analysis_text = chunks[0] if len(chunks) > 0 else text[:5000]
-    results = await run_all_agents(analysis_text)
+    orchestrator = AzureOpenAIOrchestrator()
+    # Use full text for comprehensive analysis (or first 8000 chars if too long)
+    analysis_text = text[:8000] if len(text) > 8000 else text
+    results = orchestrator.run_all_agents(analysis_text)
     print(f"✓ Completed analysis with {len(results)} agents")
     
     # Step 5: Results ready (don't auto-save to file)
