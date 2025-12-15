@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Chat from './Chat'
 
 function App() {
@@ -9,6 +9,67 @@ function App() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [showChat, setShowChat] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [documents, setDocuments] = useState([])
+  const [selectedDocument, setSelectedDocument] = useState(null)
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(true)
+  const [workspaceName, setWorkspaceName] = useState('')
+  const [workspaceDescription, setWorkspaceDescription] = useState('')
+
+  // Fetch documents on component mount
+  useEffect(() => {
+    fetchDocuments()
+  }, [])
+
+  const fetchDocuments = async () => {
+    setIsLoadingDocuments(true)
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/api/documents`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch documents')
+      }
+      
+      const data = await response.json()
+      console.log('Fetched documents:', data)
+      
+      // Remove duplicates based on id
+      const uniqueDocuments = Array.from(
+        new Map(data.documents.map(doc => [doc.id, doc])).values()
+      )
+      
+      console.log('Unique documents:', uniqueDocuments.length)
+      setDocuments(uniqueDocuments)
+    } catch (err) {
+      console.error('Error fetching documents:', err)
+      setDocuments([])
+    } finally {
+      setIsLoadingDocuments(false)
+    }
+  }
+
+  const handleViewDocument = async (documentId) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/api/documents/${documentId}`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch document content')
+      }
+      
+      const data = await response.json()
+      setSelectedDocument(data)
+    } catch (err) {
+      console.error('Error fetching document:', err)
+      alert('Failed to load document')
+    }
+  }
+
+  const handleDownloadDocument = (documentId) => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    window.open(`${apiUrl}/api/documents/${documentId}/download`, '_blank')
+  }
 
   const handleDragOver = (e) => {
     e.preventDefault()
@@ -92,6 +153,14 @@ function App() {
         output: data.output
       })
       
+      // Refresh documents list after successful processing
+      await fetchDocuments()
+      
+      // Reset form but keep modal open
+      setFile(null)
+      setWorkspaceName('')
+      setWorkspaceDescription('')
+      
     } catch (err) {
       setError('Failed to process document: ' + err.message)
     } finally {
@@ -101,23 +170,228 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">
-              RFP Assistant
-            </h1>
-            <p className="text-xl text-gray-600">
-              Upload your RFP document to get AI-powered analysis and insights
-            </p>
+    <div className="h-screen overflow-y-auto bg-gray-100 align-left">
+
+      {/* Main Content */}
+      <div className="container mx-auto px-0 py-8">
+        <div className="bg-white rounded-lg shadow">
+          {/* Workspace Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b bg-blue-600 text-white rounded-t-lg">
+            <div>
+              <h2 className="text-xl font-semibold">Smart Flow</h2>
+              <p className="text-sm text-blue-100 mt-1">AI-Powered RFP Assistant</p>
+            </div>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition-colors flex items-center gap-2 font-semibold"
+            >
+              <span className="text-xl">+</span> Create New
+            </button>
           </div>
 
-          {/* Upload Section */}
-          {!isProcessing && !result && (
-            <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-              <div
+          {/* Documents Section */}
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-700">
+                Processed Documents ({documents.length})
+              </h3>
+              <button
+                onClick={fetchDocuments}
+                disabled={isLoadingDocuments}
+                className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm"
+              >
+                <svg className={`w-4 h-4 ${isLoadingDocuments ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Refresh
+              </button>
+            </div>
+
+            {/* Loading State */}
+            {isLoadingDocuments && documents.length === 0 && (
+              <div className="text-center py-12">
+                <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-500">Loading documents...</p>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!isLoadingDocuments && documents.length === 0 && (
+              <div className="text-center py-12">
+                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="text-gray-500 text-lg mb-2">No documents yet</p>
+                <p className="text-gray-400 text-sm">Upload an RFP document to get started</p>
+              </div>
+            )}
+
+            {/* Documents Table */}
+            {!isLoadingDocuments && documents.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Workspace Name</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Size</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Modified</th>
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {documents.map((doc) => (
+                      <tr key={doc.id} className="border-b hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-4">
+                          <div className="flex items-center gap-2">
+                            <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-gray-700 font-medium">{doc.filename}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 text-gray-600 text-sm">{doc.size_formatted}</td>
+                        <td className="px-4 py-4 text-gray-600 text-sm">
+                          {new Date(doc.modified_at).toLocaleString()}
+                        </td>
+                        <td className="px-4 py-4">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleViewDocument(doc.id)}
+                              className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded transition-colors"
+                              title="View Document"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleDownloadDocument(doc.id)}
+                              className="text-green-600 hover:text-green-800 p-1 hover:bg-green-50 rounded transition-colors"
+                              title="Download Document"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => setShowChat(true)}
+                              className="text-purple-600 hover:text-purple-800 p-1 hover:bg-purple-50 rounded transition-colors"
+                              title="Chat with Document"
+                            >
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                                <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Document Viewer Modal */}
+      {selectedDocument && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-8 py-6 border-b">
+              <h2 className="text-2xl font-bold text-blue-900">{selectedDocument.filename}</h2>
+              <button
+                onClick={() => setSelectedDocument(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-8 overflow-y-auto flex-1">
+              <pre className="whitespace-pre-wrap text-sm text-gray-700 font-mono bg-gray-50 p-6 rounded-lg border">
+                {selectedDocument.content}
+              </pre>
+            </div>
+            <div className="px-8 py-4 border-t bg-gray-50 rounded-b-2xl flex gap-3 justify-end">
+              <button
+                onClick={() => handleDownloadDocument(selectedDocument.document_id)}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download
+              </button>
+              <button
+                onClick={() => setSelectedDocument(null)}
+                className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-8 py-6 border-b">
+              <h2 className="text-2xl font-bold text-blue-900">Upload RFP Document</h2>
+              <button
+                onClick={() => {
+                  setShowModal(false)
+                  setFile(null)
+                  setError(null)
+                  setWorkspaceName('')
+                  setWorkspaceDescription('')
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-8">
+              {/* Workspace Name Input */}
+              {!result && <div className="mb-6">
+                <label htmlFor="workspaceName" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Workspace Name
+                </label>
+                <input
+                  type="text"
+                  id="workspaceName"
+                  value={workspaceName}
+                  onChange={(e) => setWorkspaceName(e.target.value)}
+                  placeholder="Enter workspace name (e.g., Customer Support RFP)"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                />
+              </div>}
+
+              {/* Workspace Description Input */}
+              {!result && <div className="mb-6">
+                <label htmlFor="workspaceDescription" className="block text-sm font-semibold text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  id="workspaceDescription"
+                  value={workspaceDescription}
+                  onChange={(e) => setWorkspaceDescription(e.target.value)}
+                  placeholder="Enter a brief description of this workspace"
+                  rows="3"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all resize-none"
+                />
+              </div>}
+
+              {/* File Upload Area */}
+              {!result && <div
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
@@ -157,7 +431,7 @@ function App() {
                 >
                   Select PDF
                 </label>
-              </div>
+              </div>}
 
               {error && (
                 <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
@@ -165,96 +439,85 @@ function App() {
                 </div>
               )}
 
-              {file && !error && (
+              {isProcessing && (
+                <div className="mt-6 p-6 bg-blue-50 rounded-xl text-center">
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+                    <p className="text-lg text-indigo-600 font-semibold animate-pulse">
+                      {progress || 'Processing your document...'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {file && !error && !isProcessing && (
                 <div className="mt-6 flex justify-center">
                   <button
                     onClick={handleUpload}
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    disabled={!workspaceName.trim()}
+                    className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     Process Document
                   </button>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Processing State */}
-          {isProcessing && (
-            <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
-              <div className="flex flex-col items-center">
-                <div className="relative">
-                  <div className="w-24 h-24 border-8 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 bg-indigo-100 rounded-full"></div>
+              {/* Results Section */}
+              {result && (
+                <div className="mt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      Analysis Complete
+                    </h3>
+                    <button
+                      onClick={() => {
+                        setFile(null)
+                        setResult(null)
+                        setWorkspaceName('')
+                        setWorkspaceDescription('')
+                      }}
+                      className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      Process Another
+                    </button>
                   </div>
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">
-                  Processing Your Document
-                </h2>
-                <p className="text-lg text-indigo-600 font-semibold animate-pulse">
-                  {progress}
-                </p>
-                <p className="text-sm text-gray-500 mt-4">
-                  This may take a few minutes...
-                </p>
-              </div>
-            </div>
-          )}
+                  
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <p className="text-green-800 font-semibold">{result.message}</p>
+                  </div>
 
-          {/* Results Section */}
-          {result && (
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-gray-900">
-                  Analysis Complete
-                </h2>
-                <button
-                  onClick={() => {
-                    setFile(null)
-                    setResult(null)
-                    setShowChat(false)
-                  }}
-                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-                >
-                  Process Another
-                </button>
-              </div>
-              
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                <p className="text-green-800 font-semibold">{result.message}</p>
-              </div>
-
-              {!showChat && (
-                <div className="prose max-w-none">
-                  <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-semibold text-gray-900">Knowledge Base</h3>
-                      <button
-                        onClick={() => {
-                          const blob = new Blob([result.output], { type: 'text/markdown' })
-                          const url = URL.createObjectURL(blob)
-                          const a = document.createElement('a')
-                          a.href = url
-                          a.download = 'knowledge-base.md'
-                          a.click()
-                          URL.revokeObjectURL(url)
-                        }}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        Download KB
-                      </button>
-                      <button
-                        onClick={() => setShowChat(true)}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-                          <path d="M576 304C576 436.5 461.4 544 320 544C282.9 544 247.7 536.6 215.9 523.3L97.5 574.1C88.1 578.1 77.3 575.8 70.4 568.3C63.5 560.8 62 549.8 66.8 540.8L115.6 448.6C83.2 408.3 64 358.3 64 304C64 171.5 178.6 64 320 64C461.4 64 576 171.5 576 304z"/>
-                        </svg>
-                        Chat
-                      </button>
+                      <h4 className="text-lg font-semibold text-gray-900">Knowledge Base</h4>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            const blob = new Blob([result.output], { type: 'text/markdown' })
+                            const url = URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = 'knowledge-base.md'
+                            a.click()
+                            URL.revokeObjectURL(url)
+                          }}
+                          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                          Download KB
+                        </button>
+                        <button
+                          onClick={() => setShowChat(true)}
+                          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                        >
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                            <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+                          </svg>
+                          Chat
+                        </button>
+                      </div>
                     </div>
                     <div className="text-gray-700 whitespace-pre-wrap overflow-auto max-h-96 text-sm font-mono bg-white p-4 rounded border border-gray-300">
                       {result.output}
@@ -262,14 +525,39 @@ function App() {
                   </div>
                 </div>
               )}
-
-              {showChat && (
-                <Chat />
-              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Chat Modal */}
+      {showChat && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between px-8 py-6 border-b">
+              <h2 className="text-2xl font-bold text-blue-900">Chat with Knowledge Base</h2>
+              <button
+                onClick={() => setShowChat(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <Chat />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="bg-[#1e2875] text-white py-4 mt-auto fixed bottom-0 w-full">
+        <div className="container mx-auto px-4 text-center text-sm">
+          © 2025 RFP Process Enhancer. All rights reserved.
+        </div>
+      </footer>
     </div>
   )
 }

@@ -5,14 +5,15 @@ Provides REST API endpoints for the React frontend
 
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 import os
 import tempfile
 from pathlib import Path
 from pipeline import process_rfp_document
 from agent import ContextAgent
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime
 
 class ChatRequest(BaseModel):
     question: str
@@ -183,54 +184,6 @@ async def get_knowledge_base():
         "content": content
     })
 
-@app.get("/api/documents")
-async def list_documents():
-    """
-    List all documents in Azure Blob Storage
-    
-    Returns:
-        JSON with list of stored documents
-    """
-    try:
-        from azure.storage.blob import BlobServiceClient
-        import config
-        
-        if not config.AZURE_STORAGE_CONNECTION_STRING:
-            return JSONResponse(content={
-                "success": False,
-                "message": "Blob storage not configured",
-                "documents": []
-            })
-        
-        blob_service_client = BlobServiceClient.from_connection_string(
-            config.AZURE_STORAGE_CONNECTION_STRING
-        )
-        container_client = blob_service_client.get_container_client("rfp-documents")
-        
-        documents = []
-        for blob in container_client.list_blobs():
-            documents.append({
-                "name": blob.name,
-                "size": blob.size,
-                "created": blob.creation_time.isoformat() if blob.creation_time else None,
-                "last_modified": blob.last_modified.isoformat() if blob.last_modified else None
-            })
-        
-        return JSONResponse(content={
-            "success": True,
-            "count": len(documents),
-            "documents": documents
-        })
-        
-    except Exception as e:
-        return JSONResponse(
-            status_code=500,
-            content={
-                "success": False,
-                "error": str(e)
-            }
-        )
-
 @app.delete("/api/documents/{blob_name}")
 async def delete_document(blob_name: str):
     """
@@ -293,6 +246,129 @@ def chat(request: ChatRequest):
         raise HTTPException(
             status_code=500,
             detail=f"Error processing request: {str(e)}"
+        )
+
+@app.get("/api/documents")
+async def get_documents():
+    """
+    Get list of processed documents from data/context folder
+    
+    Returns:
+        JSON with list of documents and their metadata
+    """
+    try:
+        context_dir = Path(__file__).parent / "data" / "context"
+        
+        print(f"Looking for documents in: {context_dir}")
+        print(f"Directory exists: {context_dir.exists()}")
+        
+        # Create directory if it doesn't exist
+        os.makedirs(context_dir, exist_ok=True)
+        
+        documents = []
+        
+        # List all .md files in context directory
+        if context_dir.exists():
+            md_files = list(context_dir.glob("*.md"))
+            print(f"Found {len(md_files)} .md files")
+            for file_path in md_files:
+                print(f"  - {file_path.name}")
+                stat = file_path.stat()
+                documents.append({
+                    "id": file_path.stem,
+                    "name": file_path.name,
+                    "filename": file_path.name,
+                    "path": str(file_path),
+                    "size": stat.st_size,
+                    "size_formatted": f"{stat.st_size / 1024:.1f} KB" if stat.st_size > 1024 else f"{stat.st_size} B",
+                    "created_at": datetime.fromtimestamp(stat.st_ctime).isoformat(),
+                    "modified_at": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                })
+        
+        # Sort by modified date (newest first)
+        documents.sort(key=lambda x: x["modified_at"], reverse=True)
+        
+        print(f"Returning {len(documents)} documents")
+        
+        return {
+            "success": True,
+            "count": len(documents),
+            "documents": documents
+        }
+        
+    except Exception as e:
+        print(f"Error in get_documents: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve documents: {str(e)}"
+        )
+
+@app.get("/api/documents/{document_id}")
+async def get_document_content(document_id: str):
+    """
+    Get content of a specific document
+    
+    Args:
+        document_id: ID (filename without extension) of the document
+        
+    Returns:
+        Document content
+    """
+    try:
+        context_dir = Path(__file__).parent / "data" / "context"
+        file_path = context_dir / f"{document_id}.md"
+        
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        return {
+            "success": True,
+            "document_id": document_id,
+            "filename": f"{document_id}.md",
+            "content": content
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve document: {str(e)}"
+        )
+
+@app.get("/api/documents/{document_id}/download")
+async def download_document(document_id: str):
+    """
+    Download a specific document
+    
+    Args:
+        document_id: ID (filename without extension) of the document
+        
+    Returns:
+        File download
+    """
+    try:
+        context_dir = Path(__file__).parent / "data" / "context"
+        file_path = context_dir / f"{document_id}.md"
+        
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        return FileResponse(
+            path=file_path,
+            filename=f"{document_id}.md",
+            media_type="text/markdown"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to download document: {str(e)}"
         )
 
 if __name__ == "__main__":
