@@ -109,7 +109,7 @@ def process_rfp(req: func.HttpRequest) -> func.HttpResponse:
                 results = process_rfp_document(blob_name=blob_name)
                 
                 # Read generated KB
-                kb_path = Path(__file__).parent / "kb.md"
+                kb_path = Path(__file__).parent / "data/context/kb.md"
                 if kb_path.exists():
                     with open(kb_path, 'r', encoding='utf-8') as f:
                         kb_content = f.read()
@@ -284,7 +284,7 @@ def get_knowledge_base(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Knowledge base retrieval requested')
     
     try:
-        kb_path = Path(__file__).parent / "kb.md"
+        kb_path = Path(__file__).parent / "data/context/kb.md"
         
         if not kb_path.exists():
             return func.HttpResponse(

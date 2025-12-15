@@ -10,6 +10,20 @@ import os
 import tempfile
 from pathlib import Path
 from pipeline import process_rfp_document
+from agent import ContextAgent
+from pydantic import BaseModel
+from typing import Optional
+
+class ChatRequest(BaseModel):
+    question: str
+    history: Optional[list] = None
+
+class ChatResponse(BaseModel):
+    answer: str
+
+class HealthResponse(BaseModel):
+    status: str
+    agent_initialized: bool
 
 app = FastAPI(title="RFP Process Enhancer API")
 
@@ -120,7 +134,7 @@ async def process_document(file: UploadFile = File(...), use_blob_storage: bool 
                 raise
         
         # Read the generated knowledge base
-        kb_path = Path(__file__).parent / "kb.md"
+        kb_path = Path(__file__).parent / "data/context/kb.md"
         print(f"Looking for kb.md at: {kb_path}")
         if kb_path.exists():
             with open(kb_path, 'r', encoding='utf-8') as f:
@@ -156,7 +170,7 @@ async def get_knowledge_base():
     Returns:
         JSON with the knowledge base markdown content
     """
-    kb_path = Path(__file__).parent / "kb.md"
+    kb_path = Path(__file__).parent / "data/context/kb.md"
     
     if not kb_path.exists():
         raise HTTPException(status_code=404, detail="Knowledge base not found")
@@ -249,6 +263,37 @@ async def delete_document(blob_name: str):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/chat", response_model=ChatResponse)
+def chat(request: ChatRequest):
+    """
+    Chat endpoint to ask questions to the agent.
+    
+    Args:
+        request: ChatRequest containing the user's question
+        
+    Returns:
+        ChatResponse with the agent's answer
+    """
+
+    context_file = os.path.join("data/context", "kb.md")
+    memory_file = os.path.join("data/memory", "memory.md")
+
+    agent = ContextAgent(context_file, memory_file=memory_file)
+    if agent is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Agent not initialized. Please ensure the context file exists."
+        )
+    
+    try:
+        answer = agent.chat(request.question, request.history or [])
+        return ChatResponse(answer=answer)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing request: {str(e)}"
+        )
 
 if __name__ == "__main__":
     import uvicorn

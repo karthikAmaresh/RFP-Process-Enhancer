@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Chat from './Chat'
 
 function App() {
   const [file, setFile] = useState(null)
@@ -7,6 +8,7 @@ function App() {
   const [progress, setProgress] = useState('')
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
+  const [showChat, setShowChat] = useState(false)
 
   const handleDragOver = (e) => {
     e.preventDefault()
@@ -105,7 +107,7 @@ function App() {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-gray-900 mb-4">
-              RFP Process Enhancer
+              RFP Assistant
             </h1>
             <p className="text-xl text-gray-600">
               Upload your RFP document to get AI-powered analysis and insights
@@ -210,6 +212,7 @@ function App() {
                   onClick={() => {
                     setFile(null)
                     setResult(null)
+                    setShowChat(false)
                   }}
                   className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
                 >
@@ -221,33 +224,48 @@ function App() {
                 <p className="text-green-800 font-semibold">{result.message}</p>
               </div>
 
-              <div className="prose max-w-none">
-                <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-gray-900">Knowledge Base</h3>
-                    <button
-                      onClick={() => {
-                        const blob = new Blob([result.output], { type: 'text/markdown' })
-                        const url = URL.createObjectURL(blob)
-                        const a = document.createElement('a')
-                        a.href = url
-                        a.download = 'knowledge-base.md'
-                        a.click()
-                        URL.revokeObjectURL(url)
-                      }}
-                      className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      Download KB
-                    </button>
-                  </div>
-                  <div className="text-gray-700 whitespace-pre-wrap overflow-auto max-h-96 text-sm font-mono bg-white p-4 rounded border border-gray-300">
-                    {result.output}
+              {!showChat && (
+                <div className="prose max-w-none">
+                  <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-semibold text-gray-900">Knowledge Base</h3>
+                      <button
+                        onClick={() => {
+                          const blob = new Blob([result.output], { type: 'text/markdown' })
+                          const url = URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = 'knowledge-base.md'
+                          a.click()
+                          URL.revokeObjectURL(url)
+                        }}
+                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download KB
+                      </button>
+                      <button
+                        onClick={() => setShowChat(true)}
+                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                          <path d="M576 304C576 436.5 461.4 544 320 544C282.9 544 247.7 536.6 215.9 523.3L97.5 574.1C88.1 578.1 77.3 575.8 70.4 568.3C63.5 560.8 62 549.8 66.8 540.8L115.6 448.6C83.2 408.3 64 358.3 64 304C64 171.5 178.6 64 320 64C461.4 64 576 171.5 576 304z"/>
+                        </svg>
+                        Chat
+                      </button>
+                    </div>
+                    <div className="text-gray-700 whitespace-pre-wrap overflow-auto max-h-96 text-sm font-mono bg-white p-4 rounded border border-gray-300">
+                      {result.output}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {showChat && (
+                <Chat />
+              )}
             </div>
           )}
         </div>
